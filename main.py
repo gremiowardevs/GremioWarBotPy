@@ -19,6 +19,8 @@ from firebase_admin import db
 import asyncio
 import calendar;
 import time;
+from PIL import Image, ImageDraw, ImageFont
+import datetime
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('gremiowarbotpy-firebase-adminsdk-n4ph5-54aa378e6b.json')
@@ -48,16 +50,15 @@ def catch_exceptions(cancel_on_failure=False):
 #    post()
 
 @catch_exceptions()
-def testingPost():
-    msg = "Si estás viendoe esta publicación, significa que, después de dos años, facebook dejo de ponerse popi y el bot podrá funcionar."
+def fbpost(msg,imgpath):
 
-    with open('./assets/token.txt','r') as token:
+    with open(imgpath,'r') as token:
         accesstoken = token.readline()
     graph = facebook.GraphAPI(accesstoken)
     post_id = graph.put_photo(image=open("./assets/weareback.png","rb"),message = msg)['post_id']
     print(f"Mensaje \"{msg}\" y publicación subida correctamente!")
 
-def testrun():
+def evento():
     print("OCURRIÓ UN EVENTO")
 
     seed(calendar.timegm(time.gmtime()))
@@ -67,13 +68,9 @@ def testrun():
     listaParticipantes = db.reference("primerEvento/participantes").get()
     listaVivos = []
 
-    print("TODOS LOS PARTICIPANTES:")
     for key in listaParticipantes:
         if(key['vivo']):
-            print(str(key['id'])+": "+key['nombre']+" [vivo]")
             listaVivos.append(key)
-        else:
-            print(str(key['id'])+": "+key['nombre']+" [MUERTO]")
 
 
     tamano_lista_vivos = len(listaVivos)
@@ -81,35 +78,20 @@ def testrun():
     id_vencedor_listavivos = randint(0, tamano_lista_vivos-1)
     id_derrotado_listavivos = randint(0,tamano_lista_vivos-1)
     while(id_vencedor_listavivos == id_derrotado_listavivos):
-        id_derrotado_listavivos = randint(0,tamano_lista_vivos)
+        id_derrotado_listavivos = randint(0,tamano_lista_vivos-1)
 
     vencedor = listaVivos[id_vencedor_listavivos]
     derrotado = listaVivos[id_derrotado_listavivos]
+    id_evento= datetime.datetime.now().strftime("%d%m%Y-%H%M%S")+"-"+str(vencedor['id'])+"vs"+str(derrotado['id'])
 
     db.reference("primerEvento/participantes/"+str(derrotado['id'])+"/vivo").set(False)
     db.reference("primerEvento/participantes/"+str(vencedor['id'])+"/killcount").set(vencedor['killcount']+1)
 
-    db.reference("primerEvento/lucha/"+str(vencedor['id'])+"vs"+str(derrotado['id'])).set({
+    db.reference("primerEvento/lucha/"+id_evento).set({
         'vencedor':vencedor['nombre'],
         'derrotado':derrotado['nombre'],
         'causamuerte':causa_muerte
     })
-
-    if(tamano_lista_vivos == 2):
-        db.reference("primerEvento/resultados/ganador/nombre").set(vencedor['nombre'])
-        db.reference("primerEvento/resultados/ganador/killcount").set(vencedor['killcount']+1)
-        msg = "¡"+vencedor['nombre']+" HA SIDO EL VENCEDOR DE LA PRIMERA TEMPORADA DE VENEZUELA GREMIOMEMEROWARBOT!"
-        print(msg)
-        listaParticipantes = db.reference("primerEvento/participantes").get()
-        topKiller = listaParticipantes[0]
-        for key in listaParticipantes:
-            if(key['killcount']>topKiller['killcount']):
-                topKiller = key
-
-        db.reference("primerEvento/resultados/topkiller/nombre").set(topKiller['nombre'])
-        db.reference("primerEvento/resultados/topkiller/killcount").set(topKiller['killcount'])
-        print("El mayor Killcount fue de: "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" luchadores vencidos")
-        exit()
     
     listaParticipantes = db.reference("primerEvento/participantes").get()
     topKiller = listaParticipantes[0]
@@ -117,20 +99,74 @@ def testrun():
         if(key['killcount']>topKiller['killcount']):
             topKiller = key
     
+    msg_top_killer = "Topkiller hasta el momento:"+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" luchadores vencidos\n"
+    msg_batalla = vencedor['nombre']+" "+causa_muerte+" "+derrotado['nombre']+"\n"
+    msg_killcount_vencedor = vencedor['nombre']+" lleva un killcount de :"+str(vencedor['killcount']+1)+"\n"
     print("Evento creado")
-    print(vencedor['nombre']+" "+causa_muerte+" "+derrotado['nombre'])
-    print(vencedor['nombre']+" lleva un killcount de :"+str(vencedor['killcount']+1))
-    print("Top Killer hasta el momento:"+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" luchadores vencidos")
+    print(msg_batalla)
+    print(msg_killcount_vencedor)
+    print(msg_top_killer)
+    
+    canvas = Image.new('RGB', (1270,370), 'black')
+    img_draw = ImageDraw.Draw(canvas)
+    fnt = ImageFont.truetype("arial.ttf", 15)
+    iterateParticipante = 0
+    anchoAux=10
+    i = 0
+    for i  in range(4):
+        largoauxiliar = 5
+        j = 0
+        for j in range(18):
+            if(iterateParticipante < len(listaParticipantes)):
+                participante = listaParticipantes[iterateParticipante]
+                if(participante['vivo']):
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='green')
+                else:
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='red')
+                largoauxiliar+=20
+                iterateParticipante+=1
+            else:
+                break
+        anchoAux+=328
+    
+    canvas.save('./images/'+id_evento+".png")
+    rutaImagen =  './images/'+id_evento+".png"
+
+    if(tamano_lista_vivos == 2):
+        db.reference("primerEvento/resultados/ganador/nombre").set(vencedor['nombre'])
+        db.reference("primerEvento/resultados/ganador/killcount").set(vencedor['killcount']+1)
+        msg_ganador_final = "¡"+vencedor['nombre']+" HA SIDO EL VENCEDOR DE LA PRIMERA TEMPORADA DE VENEZUELA GREMIOMEMEROWARBOT!\n"
+        print(msg_ganador_final)
+        msg_ganador_killcount = vencedor['nombre']+" venció un total de "+str(vencedor['killcount']+1)+" para ser campeón total.\n"
+
+        listaParticipantes = db.reference("primerEvento/participantes").get()
+        topKiller = listaParticipantes[0]
+
+        for key in listaParticipantes:
+            if(key['killcount']>topKiller['killcount']):
+                topKiller = key
+
+        msg_top_killer_final =  "El topkiller fue "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" luchadores vencidos\n"
+        db.reference("primerEvento/resultados/topkiller/nombre").set(topKiller['nombre'])
+        db.reference("primerEvento/resultados/topkiller/killcount").set(topKiller['killcount'])
+        print(msg_top_killer_final)
+
+        msg_finalizacion_contienda = msg_batalla+msg_ganador_final+msg_ganador_killcount+msg_top_killer_final
+        #Posteo final
+        fbpost(msg_finalizacion_contienda,rutaImagen)
+        exit()
+    else:
+        msg_post = msg_batalla+msg_killcount_vencedor+msg_top_killer
+        #posteo normal
+        fbpost(msg_post,rutaImagen)
            
-
-
 if __name__ == '__main__':
     token = open('./assets/token.txt', 'r')
     if token.readline() == "putyourtokenherexdd":
         print("put your access token in assets/token.txt. you can obtain the access token from http://maxbots.ddns.net/token/")
         sys.exit("error no token")
     
-    schedule.every(10).seconds.do(testrun)
+    schedule.every(10).seconds.do(evento)
     
     while True:
         schedule.run_pending()
