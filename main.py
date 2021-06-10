@@ -52,13 +52,17 @@ def catch_exceptions(cancel_on_failure=False):
 @catch_exceptions()
 def fbpost(msg,imgpath):
 
-    with open(imgpath,'r') as token:
+    with open('./assets/token.txt','r') as token:
         accesstoken = token.readline()
     graph = facebook.GraphAPI(accesstoken)
-    post_id = graph.put_photo(image=open("./assets/weareback.png","rb"),message = msg)['post_id']
+    post_id = graph.put_photo(image=open(imgpath,"rb"),message = msg)['post_id']
     print(f"Mensaje \"{msg}\" y publicación subida correctamente!")
 
 def evento():
+    activo=db.reference("primerEvento/activo").get()
+    if(not(activo)):
+        print("¡No quedan suficientes participantes vivos!")
+        exit()
     print("OCURRIÓ UN EVENTO")
 
     seed(calendar.timegm(time.gmtime()))
@@ -69,6 +73,7 @@ def evento():
     listaVivos = []
 
     for key in listaParticipantes:
+        print(str(key['id'])+": "+key['nombre'])
         if(key['vivo']):
             listaVivos.append(key)
 
@@ -95,27 +100,32 @@ def evento():
     
     listaParticipantes = db.reference("primerEvento/participantes").get()
     topKiller = listaParticipantes[0]
+    participantesRestantes = 0
+    
     for key in listaParticipantes:
+        if(key['vivo']):
+            participantesRestantes+=1
         if(key['killcount']>topKiller['killcount']):
             topKiller = key
+
+    msg_batalla = vencedor['nombre']+" "+causa_muerte+" "+derrotado['nombre']+".\n"
+    msg_killcount_vencedor = vencedor['nombre']+" lleva un killcount de: "+str(vencedor['killcount']+1)+".\n"
+    msg_restantes = "Quedan "+str(participantesRestantes)+" vivos.\n"
+    msg_top_killer = "Topkiller hasta el momento: "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" contrincantes vencidos.\n"
     
-    msg_top_killer = "Topkiller hasta el momento:"+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" luchadores vencidos\n"
-    msg_batalla = vencedor['nombre']+" "+causa_muerte+" "+derrotado['nombre']+"\n"
-    msg_killcount_vencedor = vencedor['nombre']+" lleva un killcount de :"+str(vencedor['killcount']+1)+"\n"
     print("Evento creado")
-    print(msg_batalla)
-    print(msg_killcount_vencedor)
-    print(msg_top_killer)
     
     canvas = Image.new('RGB', (1270,370), 'black')
     img_draw = ImageDraw.Draw(canvas)
     fnt = ImageFont.truetype("arial.ttf", 15)
     iterateParticipante = 0
     anchoAux=10
+    
     i = 0
     for i  in range(4):
         largoauxiliar = 5
         j = 0
+        
         for j in range(18):
             if(iterateParticipante < len(listaParticipantes)):
                 participante = listaParticipantes[iterateParticipante]
@@ -135,30 +145,25 @@ def evento():
     if(tamano_lista_vivos == 2):
         db.reference("primerEvento/resultados/ganador/nombre").set(vencedor['nombre'])
         db.reference("primerEvento/resultados/ganador/killcount").set(vencedor['killcount']+1)
+
         msg_ganador_final = "¡"+vencedor['nombre']+" HA SIDO EL VENCEDOR DE LA PRIMERA TEMPORADA DE VENEZUELA GREMIOMEMEROWARBOT!\n"
-        print(msg_ganador_final)
         msg_ganador_killcount = vencedor['nombre']+" venció un total de "+str(vencedor['killcount']+1)+" para ser campeón total.\n"
+        msg_top_killer_final =  "El topkiller fue "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" contrincantes vencidos\n"
 
-        listaParticipantes = db.reference("primerEvento/participantes").get()
-        topKiller = listaParticipantes[0]
-
-        for key in listaParticipantes:
-            if(key['killcount']>topKiller['killcount']):
-                topKiller = key
-
-        msg_top_killer_final =  "El topkiller fue "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" luchadores vencidos\n"
+        db.reference("primerEvento/estado").set(False)
         db.reference("primerEvento/resultados/topkiller/nombre").set(topKiller['nombre'])
         db.reference("primerEvento/resultados/topkiller/killcount").set(topKiller['killcount'])
-        print(msg_top_killer_final)
-
         msg_finalizacion_contienda = msg_batalla+msg_ganador_final+msg_ganador_killcount+msg_top_killer_final
+        print(msg_finalizacion_contienda)
+
         #Posteo final
-        fbpost(msg_finalizacion_contienda,rutaImagen)
+        #fbpost(msg_finalizacion_contienda,rutaImagen)
         exit()
     else:
-        msg_post = msg_batalla+msg_killcount_vencedor+msg_top_killer
+        msg_post = msg_batalla+msg_killcount_vencedor+msg_restantes+msg_top_killer
+        print(msg_post)
         #posteo normal
-        fbpost(msg_post,rutaImagen)
+        #fbpost(msg_post,rutaImagen)
            
 if __name__ == '__main__':
     token = open('./assets/token.txt', 'r')
@@ -166,7 +171,7 @@ if __name__ == '__main__':
         print("put your access token in assets/token.txt. you can obtain the access token from http://maxbots.ddns.net/token/")
         sys.exit("error no token")
     
-    schedule.every(10).seconds.do(evento)
+    schedule.every(6).seconds.do(evento)
     
     while True:
         schedule.run_pending()
