@@ -1,3 +1,4 @@
+from typing import Counter
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
@@ -12,15 +13,19 @@ firebase_admin.initialize_app(cred, {
 })
 # As an admin, the app has access to read and write all data, regradless of Security Rules
 
-causamuerte =  open("CausaMuerte.txt","r")
+causamuerte =  open("Participantes.txt","r", encoding="utf-8")
 
-lineas = causamuerte.readlines()
+lineas = causamuerte.read().splitlines()
 
-refBaseDatos = db.reference('causamuerte')
-
+refBaseDatos = db.reference("primerEvento/participantes")
 counter = 0
 for linea in lineas:
     print(str(counter)+": "+linea)
     refCausaMuerte = refBaseDatos.child(str(counter))
-    refCausaMuerte.set(linea)
+    refCausaMuerte.set({
+        'id': counter,
+        'nombre': linea,
+        'vivo': True,
+        'killcount' : 0,
+    })
     counter+=1
