@@ -2,7 +2,7 @@
 #Reddit: https://reddit.com/u/Boidushya
 #Facebook: https://facebook.com/soumyadipta.despacito
 
-import cv2
+#import cv2
 import os
 import math
 import facebook
@@ -12,6 +12,18 @@ import time
 import fnmatch
 import sys
 
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
+import asyncio
+
+# Fetch the service account key JSON file contents
+cred = credentials.Certificate('gremiowarbotpy-firebase-adminsdk-n4ph5-54aa378e6b.json')
+
+# Initialize the app with a service account, granting admin privileges
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://gremiowarbotpy-default-rtdb.firebaseio.com/'
+})
 
 def catch_exceptions(cancel_on_failure=False):
     def catch_exceptions_decorator(job_func):
@@ -27,30 +39,6 @@ def catch_exceptions(cancel_on_failure=False):
         return wrapper
     return catch_exceptions_decorator
 
-def extractFrames():
-    file = os.listdir('./assets/video')[0]
-    videoFile = f"./assets/video/{file}"
-    if not os.path.exists('./assets/frames'):
-        os.mkdir('./assets/frames')
-    if os.path.exists("./assets/frames/*.jpg"):
-        os.remove("./assets/frames/*.jpg")
-    vidcap = cv2.VideoCapture(videoFile)
-    success,image = vidcap.read()
-    fps = vidcap.get(cv2.CAP_PROP_FPS)
-    required_fps =2 #if you want you can change the FPS for your video here
-    #The more the fps, the more number of frames
-    multiplier = round(fps/required_fps)
-    x=0
-
-    while success:
-        frameId = int(round(vidcap.get(1)))
-        success, image = vidcap.read()
-
-        if frameId % multiplier == 0:
-            x+=1
-            cv2.imwrite(f"assets/frames/frame{int(x):06d}.jpg", image)
-    vidcap.release()
-
 # Uncomment the next 5 lines and refer to line 98 if you want the bot to post multiple images at a time
 #
 #@catch_exceptions()
@@ -59,44 +47,28 @@ def extractFrames():
 #    post()
 
 @catch_exceptions()
-def post():
-    dir = os.listdir("./assets/frames")
-    dir.sort(key = lambda t : int(t[5:-4]))
-    with open("./assets/retain","a+") as f:
-        f.seek(0)
-        filled = f.read(1)
-        if not filled:
-            totalFrames = str(len(dir))
-            f.write(totalFrames)
-        else:
-            f.seek(0)
-            totalFrames = str(f.readline())
+def testingPost():
+    msg = "Si estás viendoe esta publicación, significa que, después de dos años, facebook dejo de ponerse popi y el bot podrá funcionar."
 
-    currentFrame = f'assets/frames/{dir[0]}'
-    currentFrameNumber = str(int(dir[0][5:-4]))
-    msg = f"Frame {currentFrameNumber} out of {str(totalFrames)}"
-    with open('assets/token.txt','r') as token:
+    with open('./assets/token.txt','r') as token:
         accesstoken = token.readline()
     graph = facebook.GraphAPI(accesstoken)
-    post_id = graph.put_photo(image=open(currentFrame, 'rb'),message = msg)['post_id']
-    print(f"Submitted post with title \"{msg}\" successfully!")
-    os.remove(currentFrame)
+    post_id = graph.put_photo(image=open("./assets/we are back.png"),message = msg)['post_id']
+    print(f"Mensaje \"{msg}\" y publicación subida correctamente!")
 
 if __name__ == '__main__':
     token = open('./assets/token.txt', 'r')
     if token.readline() == "putyourtokenherexdd":
         print("put your access token in assets/token.txt. you can obtain the access token from http://maxbots.ddns.net/token/")
         sys.exit("error no token")
-    ans = input("Extract Frames?(y/n) \n>")
+    ans = input("INTENTAR POSTEAR IMAGEN DE PRUEBA? \n>")
     if 'y' in ans.lower():
-        if os.path.exists("./assets/retain"):
-            os.remove("./assets/retain")
-        extractFrames()
+        testingPost()
     else:
         pass
-    schedule.every().hour.do(post).run()
+    #schedule.every().hour.do(post).run()
 #   Uncomment line 99 and comment line 97 in order to enable burst mode    
 #   schedule.every().hour.do(burst).run()
-    while 1:
-        schedule.run_pending()
-        time.sleep(1)
+    #while 1:
+       # schedule.run_pending()
+       # time.sleep(1)
