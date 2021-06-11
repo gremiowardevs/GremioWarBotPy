@@ -115,9 +115,9 @@ def evento():
     
     print("Evento creado")
     
-    canvas = Image.new('RGB', (1270,370), 'black')
+    canvas = Image.new('RGB', (1800,700), 'black')
     img_draw = ImageDraw.Draw(canvas)
-    fnt = ImageFont.truetype("arial.ttf", 15)
+    fnt = ImageFont.truetype("BOOKOS.TTF", 20)
     iterateParticipante = 0
     anchoAux=10
     
@@ -126,18 +126,18 @@ def evento():
         largoauxiliar = 5
         j = 0
         
-        for j in range(18):
+        for j in range(25):
             if(iterateParticipante < len(listaParticipantes)):
                 participante = listaParticipantes[iterateParticipante]
                 if(participante['vivo']):
                     img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='green')
                 else:
                     img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='red')
-                largoauxiliar+=20
+                largoauxiliar+=25
                 iterateParticipante+=1
             else:
                 break
-        anchoAux+=328
+        anchoAux+=345
     
     canvas.save('./images/'+id_evento+".png")
     rutaImagen =  './images/'+id_evento+".png"
@@ -164,22 +164,45 @@ def evento():
         print(msg_post)
         #posteo normal
         #fbpost(msg_post,rutaImagen)
-           
+
+def testGenerarImagen():
+    listaParticipantes = db.reference("primerEvento/participantes").get()
+    canvas = Image.new('RGB', (1390,635), 'black')
+    img_draw = ImageDraw.Draw(canvas)
+    fnt = ImageFont.truetype("BOOKOS.TTF", 20)
+    iterateParticipante = 0
+    anchoAux=10
+    i = 0
+    for i  in range(4):
+        largoauxiliar = 5
+        j = 0
+        
+        for j in range(25):
+            if(iterateParticipante < len(listaParticipantes)):
+                participante = listaParticipantes[iterateParticipante]
+                if(participante['vivo']):
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='white')
+                else:
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='white')
+                largoauxiliar+=25
+                iterateParticipante+=1
+            else:
+                break
+        anchoAux+=345
+    
+    canvas.save('./images/testingBot.png')
+
+
 if __name__ == '__main__':
     token = open('./assets/token.txt', 'r')
     if token.readline() == "putyourtokenherexdd":
         print("put your access token in assets/token.txt. you can obtain the access token from http://maxbots.ddns.net/token/")
         sys.exit("error no token")
     
-    schedule.every(6).seconds.do(evento)
-    
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    testGenerarImagen()
+    #schedule.every(6).seconds.do(evento)
     #schedule.every().hour.do(testrun).run()
-
-#   Uncomment line 99 and comment line 97 in order to enable burst mode    
-#   schedule.every().hour.do(burst).run()
-    #while 1:
-       # schedule.run_pending()
-       # time.sleep(1)
+    #while True:
+     #   schedule.run_pending()
+      #  time.sleep(1)
+    

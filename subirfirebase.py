@@ -16,10 +16,11 @@ firebase_admin.initialize_app(cred, {
 causamuerte =  open("Participantes.txt","r", encoding="utf-8")
 
 lineas = causamuerte.read().splitlines()
-
 refBaseDatos = db.reference("primerEvento/participantes")
 counter = 0
 for linea in lineas:
+    if counter == 0:
+        linea = linea[1:]
     print(str(counter)+": "+linea)
     refCausaMuerte = refBaseDatos.child(str(counter))
     refCausaMuerte.set({
