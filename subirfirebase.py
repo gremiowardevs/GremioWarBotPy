@@ -5,7 +5,7 @@ from firebase_admin import db
 import asyncio
 
 # Fetch the service account key JSON file contents
-cred = credentials.Certificate('gremiowarbotpy-firebase-adminsdk-n4ph5-54aa378e6b.json')
+cred = credentials.Certificate('./assets/gremiowarbotpy-firebase-adminsdk-n4ph5-54aa378e6b.json')
 
 # Initialize the app with a service account, granting admin privileges
 firebase_admin.initialize_app(cred, {
@@ -13,7 +13,7 @@ firebase_admin.initialize_app(cred, {
 })
 # As an admin, the app has access to read and write all data, regradless of Security Rules
 
-causamuerte =  open("Participantes.txt","r", encoding="utf-8")
+causamuerte =  open("./listas/Participantes.txt","r", encoding="utf-8")
 
 lineas = causamuerte.read().splitlines()
 refBaseDatos = db.reference("primerEvento/participantes")
