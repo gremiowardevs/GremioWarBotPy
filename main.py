@@ -141,7 +141,7 @@ def realizarLucha():
     canvas = Image.new('RGB', (1410,745), 'black')
     img_draw = ImageDraw.Draw(canvas)
     fnt = ImageFont.truetype("BOOKOS.TTF", 20)
-    fnt2 = ImageFont.truetype("arial.ttf", 20)
+    fnt2 = ImageFont.truetype("arial.ttf", 15)
     iterateParticipante = 0
     anchoAux=20
     
@@ -165,11 +165,11 @@ def realizarLucha():
     img_draw.text((10,largoauxiliar+15),"TOP 3 Killers:",font=fnt, fill='white')
 
     if listaTopKillers[0]!=None:
-        img_draw.text((35,largoauxiliar+35),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt, fill='white')
+        img_draw.text((35,largoauxiliar+35),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt2, fill='white')
     if listaTopKillers[1]!=None:
-        img_draw.text((35,largoauxiliar+55),"2. "+(listaTopKillers[1])['nombre']+" : "+str((listaTopKillers[1])['killcount']),font=fnt, fill='white')
+        img_draw.text((35,largoauxiliar+55),"2. "+(listaTopKillers[1])['nombre']+" : "+str((listaTopKillers[1])['killcount']),font=fnt2, fill='white')
     if listaTopKillers[2]!=None:
-        img_draw.text((35,largoauxiliar+75),"3. "+(listaTopKillers[2])['nombre']+" : "+str((listaTopKillers[2])['killcount']),font=fnt, fill='white')
+        img_draw.text((35,largoauxiliar+75),"3. "+(listaTopKillers[2])['nombre']+" : "+str((listaTopKillers[2])['killcount']),font=fnt2, fill='white')
 
     img_draw.text((500,largoauxiliar+15),"Fecha Evento: "+datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),font=fnt, fill='white')
     img_draw.text((500,largoauxiliar+35),msg_batalla,font=fnt, fill='white')
