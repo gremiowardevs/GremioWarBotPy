@@ -16,6 +16,8 @@ firebase_admin.initialize_app(cred, {
 causamuerte =  open("./listas/Participantes.txt","r", encoding="utf-8")
 
 db.reference("primerEvento/estado").set(True)
+db.reference("primerEvento/lucha").delete()
+db.reference("primerEvento/resultados").delete()
 
 lineas = causamuerte.read().splitlines()
 refBaseDatos = db.reference("primerEvento/participantes")
