@@ -15,6 +15,8 @@ firebase_admin.initialize_app(cred, {
 
 causamuerte =  open("./listas/Participantes.txt","r", encoding="utf-8")
 
+db.reference("primerEvento/estado").set(True)
+
 lineas = causamuerte.read().splitlines()
 refBaseDatos = db.reference("primerEvento/participantes")
 counter = 0

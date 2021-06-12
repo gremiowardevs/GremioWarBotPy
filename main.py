@@ -63,7 +63,7 @@ def fbpost(msg,imgpath):
 def realizarLucha():
 
     #VERIFICACION SI EL EVENTO ESTÁ FUNCIONANDO
-    if(not(db.reference("primerEvento/activo").get())):
+    if(not(db.reference("primerEvento/estado").get())):
         print("¡No quedan suficientes participantes vivos!")
         exit()
     
@@ -138,12 +138,10 @@ def realizarLucha():
     
 
 
-    #Se crea la imagen negra con x resolucion y la variable para modificar la imagen
-    canvas = Image.new('RGB', (1800,700), 'black')
+    listaParticipantes = db.reference("primerEvento/participantes").get()
+    canvas = Image.new('RGB', (1390,635), 'black')
     img_draw = ImageDraw.Draw(canvas)
     fnt = ImageFont.truetype("BOOKOS.TTF", 20)
-
-    #Iteración de imprimir a los participantes
     iterateParticipante = 0
     anchoAux=10
     i = 0
@@ -162,6 +160,8 @@ def realizarLucha():
             else:
                 break
         anchoAux+=345
+
+
     #Se guarda la imagen y la ruta de la misma
     canvas.save('./images/'+id_evento+".png")
     rutaImagen =  './images/'+id_evento+".png"
