@@ -84,8 +84,6 @@ def realizarLucha():
 
     #Se recorre la lista de participantes y se agregan los participantes vivos a una lista auxiliar
     for participante in listaParticipantes:
-        print(str(participante['id'])+": "+participante['nombre'])
-
         if(participante['killcount']>topKiller['killcount']):
             topKiller = participante
 
@@ -116,9 +114,10 @@ def realizarLucha():
 
     #Se aumenta el killcount del vencedor
     db.reference("primerEvento/participantes/"+str(vencedor['id'])+"/killcount").set(vencedor['killcount']+1)
+    vencedor['killcount']+=1
 
     #Si el vencedor supera en killcount al topkiller se convierte en el nuevo topkiller
-    if(vencedor['killcount']+1>topKiller['killcount']):
+    if(vencedor['killcount']>topKiller['killcount']):
         topKiller = vencedor
 
     #Se crea un evento en la base de datos con el nombre del vencedor, el nombre del derrotado y la causa de la muerte.
@@ -133,7 +132,7 @@ def realizarLucha():
 
     #Se crean los mensajes para postear
     msg_batalla = vencedor['nombre']+" "+causa_muerte+" "+derrotado['nombre']+".\n"
-    msg_killcount_vencedor = vencedor['nombre']+" lleva un killcount de: "+str(vencedor['killcount']+1)+".\n"
+    msg_killcount_vencedor = vencedor['nombre']+" lleva un killcount de: "+str(vencedor['killcount'])+".\n"
     msg_restantes = "Quedan "+str(tamano_lista_vivos)+" vivos.\n"
     msg_top_killer = "Topkiller hasta el momento: "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" contrincantes vencidos.\n"
     
@@ -171,12 +170,13 @@ def realizarLucha():
     if(tamano_lista_vivos == 1):
         #Se guarda en la base de datos el vencedor y su killcount
         db.reference("primerEvento/resultados/ganador/nombre").set(vencedor['nombre'])
-        db.reference("primerEvento/resultados/ganador/killcount").set(vencedor['killcount']+1)
+        db.reference("primerEvento/resultados/ganador/killcount").set(vencedor['killcount'])
+        
 
 
         #Variables de mensaje de vencedor final
         msg_ganador_final = "¡"+vencedor['nombre']+" HA SIDO EL VENCEDOR DE LA PRIMERA TEMPORADA DE VENEZUELA GREMIOMEMEROWARBOT!\n"
-        msg_ganador_killcount = vencedor['nombre']+" venció un total de "+str(vencedor['killcount']+1)+" para ser campeón total.\n"
+        msg_ganador_killcount = vencedor['nombre']+" venció un total de "+str(vencedor['killcount'])+" para ser campeón total.\n"
         msg_top_killer_final =  "El topkiller fue "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" contrincantes vencidos\n"
 
         #Se desactiva el torneo
@@ -236,9 +236,9 @@ if __name__ == '__main__':
     #testGenerarImagen()
     schedule.every(6).seconds.do(realizarLucha) #USAR SOLO PARA TESTEOS CON FBPOST COMENTADO O ELIMINADO
     #schedule.every().hour.do(testrun).run()
-    #while True:
-     #   schedule.run_pending()
-      #  time.sleep(1)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 
     #OJO OJO OJO OJO OJO OJO OJO AL POSTEAR EN FB ES MINIMO 30 MINUTOS
