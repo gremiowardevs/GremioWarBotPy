@@ -115,6 +115,8 @@ def realizarLucha():
     #Se aumenta el killcount del vencedor
     db.reference("primerEvento/participantes/"+str(vencedor['id'])+"/killcount").set(vencedor['killcount']+1)
     vencedor['killcount']+=1
+    (listaParticipantes[derrotado['id']])['vivo'] = False
+    (listaParticipantes[vencedor['id']])['killcount'] += 1
 
     #Si el vencedor supera en killcount al topkiller se convierte en el nuevo topkiller
     if(vencedor['killcount']>topKiller['killcount']):
@@ -136,23 +138,20 @@ def realizarLucha():
     msg_restantes = "Quedan "+str(tamano_lista_vivos)+" vivos.\n"
     msg_top_killer = "Topkiller hasta el momento: "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" contrincantes vencidos.\n"
     
-
-
-    listaParticipantes = db.reference("primerEvento/participantes").get()
-    canvas = Image.new('RGB', (1390,635), 'black')
+    canvas = Image.new('RGB', (1410,745), 'black')
     img_draw = ImageDraw.Draw(canvas)
     fnt = ImageFont.truetype("BOOKOS.TTF", 20)
+    fnt2 = ImageFont.truetype("arial.ttf", 20)
     iterateParticipante = 0
-    anchoAux=10
-    i = 0
-    for i  in range(4):
-        largoauxiliar = 5
-        j = 0
-        for j in range(25):
+    anchoAux=20
+    
+    for i  in range(0,4):
+        largoauxiliar = 15
+        for j in range(0,25):
             if(iterateParticipante < len(listaParticipantes)):
                 participante = listaParticipantes[iterateParticipante]
                 if(participante['vivo']):
-                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='green')
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='white')
                 else:
                     img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='red')
                 largoauxiliar+=25
@@ -161,6 +160,19 @@ def realizarLucha():
                 break
         anchoAux+=345
 
+    listaTopKillers = sorted(listaParticipantes, key = lambda i: i['killcount'],reverse=True)
+
+    img_draw.text((10,largoauxiliar+15),"TOP 3 Killers:",font=fnt, fill='white')
+
+    if listaTopKillers[0]!=None:
+        img_draw.text((35,largoauxiliar+35),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt, fill='white')
+    if listaTopKillers[1]!=None:
+        img_draw.text((35,largoauxiliar+55),"2. "+(listaTopKillers[1])['nombre']+" : "+str((listaTopKillers[1])['killcount']),font=fnt, fill='white')
+    if listaTopKillers[2]!=None:
+        img_draw.text((35,largoauxiliar+75),"3. "+(listaTopKillers[2])['nombre']+" : "+str((listaTopKillers[2])['killcount']),font=fnt, fill='white')
+
+    img_draw.text((500,largoauxiliar+15),"Fecha Evento: "+datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),font=fnt, fill='white')
+    img_draw.text((500,largoauxiliar+35),msg_batalla,font=fnt, fill='white')
 
     #Se guarda la imagen y la ruta de la misma
     canvas.save('./images/'+id_evento+".png")
@@ -171,8 +183,6 @@ def realizarLucha():
         #Se guarda en la base de datos el vencedor y su killcount
         db.reference("primerEvento/resultados/ganador/nombre").set(vencedor['nombre'])
         db.reference("primerEvento/resultados/ganador/killcount").set(vencedor['killcount'])
-        
-
 
         #Variables de mensaje de vencedor final
         msg_ganador_final = "¡"+vencedor['nombre']+" HA SIDO EL VENCEDOR DE LA PRIMERA TEMPORADA DE VENEZUELA GREMIOMEMEROWARBOT!\n"
@@ -201,17 +211,15 @@ def realizarLucha():
 
 def testGenerarImagen():
     listaParticipantes = db.reference("primerEvento/participantes").get()
-    canvas = Image.new('RGB', (1390,635), 'black')
+    canvas = Image.new('RGB', (1390,735), 'black')
     img_draw = ImageDraw.Draw(canvas)
     fnt = ImageFont.truetype("BOOKOS.TTF", 20)
     iterateParticipante = 0
     anchoAux=10
-    i = 0
-    for i  in range(4):
+
+    for i  in range(0,4):
         largoauxiliar = 5
-        j = 0
-        
-        for j in range(25):
+        for j in range(0,25):
             if(iterateParticipante < len(listaParticipantes)):
                 participante = listaParticipantes[iterateParticipante]
                 if(participante['vivo']):
@@ -227,14 +235,44 @@ def testGenerarImagen():
     canvas.save('./images/testingBot.png')
 
 
+def reiniciarEvento():
+    filetexto =  open("./listas/Participantes.txt","r", encoding="utf-8")
+    db.reference("primerEvento/estado").set(True)
+    lineas = filetexto.read().splitlines()
+    refBaseDatos = db.reference("primerEvento/participantes")
+    counter = 0
+    for linea in lineas:
+        if counter == 0:
+            linea = linea[1:]
+        print(str(counter)+": "+linea)
+        refCausaMuerte = refBaseDatos.child(str(counter))
+        refCausaMuerte.set({
+            'id': counter,
+            'nombre': linea,
+            'vivo': True,
+            'killcount' : 0,
+        })
+        counter+=1
+    db.reference("primerEvento/lucha").delete()
+    db.reference("primerEvento/resultados").delete()
+    print("EVENTO REINICIADO SE EMPEZARÁ A REALIZAR")
+
 if __name__ == '__main__':
     token = open('./assets/token.txt', 'r')
     if token.readline() == "putyourtokenherexdd":
         print("put your access token in assets/token.txt. you can obtain the access token from http://maxbots.ddns.net/token/")
         sys.exit("error no token")
     
-    #testGenerarImagen()
-    schedule.every(6).seconds.do(realizarLucha) #USAR SOLO PARA TESTEOS CON FBPOST COMENTADO O ELIMINADO
+    #VERIFICACION SI EL EVENTO ESTÁ FUNCIONANDO
+    if(not(db.reference("primerEvento/estado").get())):
+        print("¡No quedan suficientes participantes vivos!")
+        ans = input("Reiniciar Evento?(y/n) \n>")
+        if 'y' in ans.lower():
+            reiniciarEvento()
+        else:
+            exit()
+    
+    schedule.every(5).seconds.do(realizarLucha) #USAR SOLO PARA TESTEOS CON FBPOST COMENTADO O ELIMINADO
     #schedule.every().hour.do(testrun).run()
     while True:
         schedule.run_pending()
