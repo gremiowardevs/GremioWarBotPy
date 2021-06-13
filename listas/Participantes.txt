@@ -1,6 +1,5 @@
 ﻿Abo
 Abraham Thotman
-Adrián Guerrero (Null pointer)
 Alberto Garcia Peralta
 Alriosa (Calvo a los 20)
 Alí Egües (DEVS VULT)
@@ -54,7 +53,6 @@ Haniel Barazarte
 Hebert Flores (Campesina)
 Hillary Colmenares (Jila)
 Inés María (Stingy)
-Isis A Luque
 J.J Rendón
 Jesús Beltrán
 Jesús Mata (Jesús Mata)
