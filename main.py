@@ -157,17 +157,22 @@ def realizarLucha():
 
     listaTopKillers = sorted(listaParticipantes, key = lambda i: i['killcount'],reverse=True)
 
-    img_draw.text((10,largoauxiliar+15),"TOP 3 Killers:",font=fnt2, fill='white')
+    largoauxiliar+=35
+    largoauxiliarViejo = largoauxiliar
+    img_draw.text((50,largoauxiliar),"TOP 3 Killers:",font=fnt2, fill='white')
 
+    largoauxiliar+=20
     if listaTopKillers[0]!=None:
-        img_draw.text((35,largoauxiliar+35),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt2, fill='white')
+        img_draw.text((100,largoauxiliar),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt2, fill='white')
+        largoauxiliar+=20
     if listaTopKillers[1]!=None:
-        img_draw.text((35,largoauxiliar+55),"2. "+(listaTopKillers[1])['nombre']+" : "+str((listaTopKillers[1])['killcount']),font=fnt2, fill='white')
+        img_draw.text((100,largoauxiliar),"2. "+(listaTopKillers[1])['nombre']+" : "+str((listaTopKillers[1])['killcount']),font=fnt2, fill='white')
+        largoauxiliar+=20
     if listaTopKillers[2]!=None:
-        img_draw.text((35,largoauxiliar+75),"3. "+(listaTopKillers[2])['nombre']+" : "+str((listaTopKillers[2])['killcount']),font=fnt2, fill='white')
+        img_draw.text((100,largoauxiliar),"3. "+(listaTopKillers[2])['nombre']+" : "+str((listaTopKillers[2])['killcount']),font=fnt2, fill='white')
 
-    img_draw.text((500,largoauxiliar+15),"Fecha Evento: "+datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),font=fnt2, fill='white')
-    img_draw.text((500,largoauxiliar+35),msg_batalla,font=fnt2, fill='white')
+    img_draw.text((500,largoauxiliarViejo),"Fecha Evento: "+datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),font=fnt2, fill='white')
+    img_draw.text((500,largoauxiliarViejo+20),msg_batalla,font=fnt2, fill='white')
 
     #Se guarda la imagen y la ruta de la misma
     canvas.save('./images/'+id_evento+".png")
