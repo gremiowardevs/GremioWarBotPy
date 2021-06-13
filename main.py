@@ -157,7 +157,7 @@ def realizarLucha():
 
     listaTopKillers = sorted(listaParticipantes, key = lambda i: i['killcount'],reverse=True)
 
-    largoauxiliar+=35
+    largoauxiliar = 25+(25*25)
     largoauxiliarViejo = largoauxiliar
     img_draw.text((50,largoauxiliar),"TOP 3 Killers:",font=fnt2, fill='white')
 
@@ -173,6 +173,7 @@ def realizarLucha():
 
     img_draw.text((500,largoauxiliarViejo),"Fecha Evento: "+datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),font=fnt2, fill='white')
     img_draw.text((500,largoauxiliarViejo+20),msg_batalla,font=fnt2, fill='white')
+    img_draw.text((500,largoauxiliarViejo+40),msg_restantes,font=fnt2, fill='white')
 
     #Se guarda la imagen y la ruta de la misma
     canvas.save('./images/'+id_evento+".png")
@@ -241,6 +242,7 @@ def reiniciarEvento():
     db.reference("primerEvento/estado").set(True)
     lineas = filetexto.read().splitlines()
     refBaseDatos = db.reference("primerEvento/participantes")
+    refBaseDatos.delete()
     counter = 0
     for linea in lineas:
         if counter == 0:
@@ -272,14 +274,17 @@ if __name__ == '__main__':
             reiniciarEvento()
         else:
             exit()
-    
-    schedule.every(5).seconds.do(realizarLucha) #USAR SOLO PARA TESTEOS CON FBPOST COMENTADO O ELIMINADO
+
+    #schedule.every(5).seconds.do(realizarLucha) #USAR SOLO PARA TESTEOS CON FBPOST COMENTADO O ELIMINADO
+
+    schedule.every().day.at("18:50").do(realizarLucha)
+    schedule.every().day.at("18:52").do(realizarLucha)
+
     #schedule.every().hour.do(testrun).run()
     while True:
         schedule.run_pending()
         time.sleep(1)
-
-
+    
     #OJO OJO OJO OJO OJO OJO OJO AL POSTEAR EN FB ES MINIMO 30 MINUTOS
     # NOS PUEDEN MATAR TODO NUESTROS FB SI EL SCRIPT FALLA Y EMPIEZA A SPAMEAR 
-    
+
