@@ -2,21 +2,16 @@
 # Codigo de bot de lucha creado por Carlos Ardila (github/carlosardilap)
 #Facebook: https://facebook.com/Charles145
 #Twitter: https://twitter.com/ArdilaVene
-#import cv2
-import os
-import math
 import facebook
 import functools
 import schedule
 import time
-import fnmatch
 import sys
 from random import seed
 from random import randint
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
-import asyncio
 import calendar;
 import time;
 from PIL import Image, ImageDraw, ImageFont
@@ -108,14 +103,14 @@ def realizarLucha():
 
     #Se genera el id de un evento con este formato "ddmmaaaa-hhmmss-IDVENCEDORvsIDDERROTADO
     id_evento= datetime.datetime.now().strftime("%d%m%Y-%H%M%S")+"-"+str(vencedor['id'])+"vs"+str(derrotado['id'])
-
     #En la base de datos se le asigna falso al estado de vivo del usuario derrotado
+
     db.reference("primerEvento/participantes/"+str(derrotado['id'])+"/vivo").set(False)
+    (listaParticipantes[derrotado['id']])['vivo'] = False
 
     #Se aumenta el killcount del vencedor
     db.reference("primerEvento/participantes/"+str(vencedor['id'])+"/killcount").set(vencedor['killcount']+1)
     vencedor['killcount']+=1
-    (listaParticipantes[derrotado['id']])['vivo'] = False
     (listaParticipantes[vencedor['id']])['killcount'] += 1
 
     #Si el vencedor supera en killcount al topkiller se convierte en el nuevo topkiller
@@ -162,17 +157,17 @@ def realizarLucha():
 
     listaTopKillers = sorted(listaParticipantes, key = lambda i: i['killcount'],reverse=True)
 
-    img_draw.text((10,largoauxiliar+15),"TOP 3 Killers:",font=fnt, fill='white')
+    img_draw.text((10,largoauxiliar+15),"TOP 3 Killers:",font=fnt2, fill='white')
 
     if listaTopKillers[0]!=None:
-        img_draw.text((35,largoauxiliar+35),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt, fill='white')
+        img_draw.text((35,largoauxiliar+35),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt2, fill='white')
     if listaTopKillers[1]!=None:
-        img_draw.text((35,largoauxiliar+55),"2. "+(listaTopKillers[1])['nombre']+" : "+str((listaTopKillers[1])['killcount']),font=fnt, fill='white')
+        img_draw.text((35,largoauxiliar+55),"2. "+(listaTopKillers[1])['nombre']+" : "+str((listaTopKillers[1])['killcount']),font=fnt2, fill='white')
     if listaTopKillers[2]!=None:
-        img_draw.text((35,largoauxiliar+75),"3. "+(listaTopKillers[2])['nombre']+" : "+str((listaTopKillers[2])['killcount']),font=fnt, fill='white')
+        img_draw.text((35,largoauxiliar+75),"3. "+(listaTopKillers[2])['nombre']+" : "+str((listaTopKillers[2])['killcount']),font=fnt2, fill='white')
 
-    img_draw.text((500,largoauxiliar+15),"Fecha Evento: "+datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),font=fnt, fill='white')
-    img_draw.text((500,largoauxiliar+35),msg_batalla,font=fnt, fill='white')
+    img_draw.text((500,largoauxiliar+15),"Fecha Evento: "+datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),font=fnt2, fill='white')
+    img_draw.text((500,largoauxiliar+35),msg_batalla,font=fnt2, fill='white')
 
     #Se guarda la imagen y la ruta de la misma
     canvas.save('./images/'+id_evento+".png")
@@ -195,6 +190,7 @@ def realizarLucha():
         #Se guarda cual fue el topkiller
         db.reference("primerEvento/resultados/topkiller/nombre").set(topKiller['nombre'])
         db.reference("primerEvento/resultados/topkiller/killcount").set(topKiller['killcount'])
+
         msg_finalizacion_contienda = msg_batalla+msg_ganador_final+msg_ganador_killcount+msg_top_killer_final
         print(msg_finalizacion_contienda)
 
