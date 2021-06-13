@@ -277,10 +277,7 @@ if __name__ == '__main__':
 
     #schedule.every(5).seconds.do(realizarLucha) #USAR SOLO PARA TESTEOS CON FBPOST COMENTADO O ELIMINADO
 
-    schedule.every().day.at("18:50").do(realizarLucha)
-    schedule.every().day.at("18:52").do(realizarLucha)
-
-    #schedule.every().hour.do(testrun).run()
+    schedule.every().day.at("06:00").do(realizarLucha)
     while True:
         schedule.run_pending()
         time.sleep(1)
