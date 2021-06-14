@@ -2,7 +2,6 @@ from typing import Counter
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
-import asyncio
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('./assets/gremiowarbotpy-firebase-adminsdk-n4ph5-54aa378e6b.json')
