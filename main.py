@@ -7,8 +7,7 @@ import functools
 import schedule
 import time
 import sys
-from random import seed
-from random import randint
+from random import seed,randint,shuffle
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
@@ -16,6 +15,7 @@ import calendar;
 import time;
 from PIL import Image, ImageDraw, ImageFont
 import datetime
+
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('./assets/gremiowarbotpy-firebase-adminsdk-n4ph5-54aa378e6b.json')
@@ -70,6 +70,7 @@ def realizarLucha():
 
     #Se obtiene un tipo de muerte al azar
     lista_tipo_muerte =  db.reference("causamuerte/").get()
+    shuffle(lista_tipo_muerte)
     causa_muerte = lista_tipo_muerte[randint(0, len(lista_tipo_muerte)-1)]
 
     #Se obtiene la lista de participantes
@@ -87,7 +88,8 @@ def realizarLucha():
             listaVivos.append(participante)
 
 
-    #Se obtiene el tamano de la lista vivos
+    #Se obtiene el tamano de la lista vivo
+    shuffle(listaVivos)
     tamano_lista_vivos = len(listaVivos)
     
     #Se obtiene un id random de un vencedor y un derrotado
@@ -145,13 +147,13 @@ def realizarLucha():
     #Variables auxiliares de iteración de pintado de la Imagen
     iterateParticipante = 0
     anchoAux=20
-    
+    listaParticipantesOrdenada =  sorted(listaParticipantes, key = lambda i: i['nombre'])
     for i  in range(0,4):
         largoauxiliar = 15
         for j in range(0,25):
-            if(iterateParticipante < len(listaParticipantes)):
+            if(iterateParticipante < len(listaParticipantesOrdenada)):
                 #Participante vivo blanco/ muerto rojo
-                participante = listaParticipantes[iterateParticipante]
+                participante = listaParticipantesOrdenada[iterateParticipante]
                 if(participante['vivo']):
                     img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='white')
                 else:
@@ -253,6 +255,8 @@ def testGenerarImagen():
     canvas.save('./images/testingBot.png')
 
 
+
+
 def reiniciarEvento():
     filetexto =  open("./listas/Participantes.txt","r", encoding="utf-8")
     lineas = filetexto.read().splitlines()
@@ -297,15 +301,12 @@ if __name__ == '__main__':
         else:
             exit()
 
-    rutaImagen1 = "./assets/Test1.png"
-    rutaImagen2 = "./assets/Test2.png"
-    diccionario_horas = ["11:00","13:00","15:00","17:00","19:00"]
-    
-    schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
-    schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
-    schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
-    schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
-    schedule.every().day.at(diccionario_horas[4]).do(realizarLucha).tag('evento5')
+    #diccionario_horas = ["11:00","13:00","15:00","17:00","19:00"]
+    #schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
+    #schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
+    #schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
+    #schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
+    #schedule.every().day.at(diccionario_horas[4]).do(realizarLucha).tag('evento5')
 
     while True:
         schedule.run_pending()
