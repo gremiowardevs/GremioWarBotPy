@@ -19,8 +19,6 @@ import datetime
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('./assets/gremiowarbotpy-firebase-adminsdk-n4ph5-54aa378e6b.json')
-global contador_horario
-contador_horario = 0
 
 # Initialize the app with a service account, granting admin privileges
 firebase_admin.initialize_app(cred, {'databaseURL': 'https://gremiowarbotpy-default-rtdb.firebaseio.com/'})
@@ -60,7 +58,6 @@ def fbpost(msg,imgpath):
 def realizarLucha():
 
     global contador_horario
-    diccionario_horas = ["21:16","21:17","21:18","21:19"]
     #VERIFICACION SI EL EVENTO ESTÁ FUNCIONANDO
     if(not(db.reference("primerEvento/estado").get())):
         print("¡No quedan suficientes participantes vivos!")
@@ -137,10 +134,15 @@ def realizarLucha():
     msg_restantes = "Quedan "+str(tamano_lista_vivos)+" vivos.\n"
     msg_top_killer = "Topkiller hasta el momento: "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" contrincantes vencidos.\n"
     
+    #Se crea la imagen
     canvas = Image.new('RGB', (1410,745), 'black')
     img_draw = ImageDraw.Draw(canvas)
+
+    #Tipos de Fuente
     fnt = ImageFont.truetype("BOOKOS.TTF", 20)
     fnt2 = ImageFont.truetype("BOOKOS.TTF", 15)
+
+    #Variables auxiliares de iteración de pintado de la Imagen
     iterateParticipante = 0
     anchoAux=20
     
@@ -148,32 +150,38 @@ def realizarLucha():
         largoauxiliar = 15
         for j in range(0,25):
             if(iterateParticipante < len(listaParticipantes)):
+                #Participante vivo blanco/ muerto rojo
                 participante = listaParticipantes[iterateParticipante]
                 if(participante['vivo']):
                     img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='white')
                 else:
-                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='red')
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='white')
                 largoauxiliar+=25
                 iterateParticipante+=1
             else:
                 break
         anchoAux+=345
 
+    #Lista ordenada por killcount de manera descendiente
     listaTopKillers = sorted(listaParticipantes, key = lambda i: i['killcount'],reverse=True)
 
+    #Se pintan los primeros 3 topkillers
     largoauxiliar = 25+(25*25)
     largoauxiliarViejo = largoauxiliar
     img_draw.text((50,largoauxiliar),"TOP 3 Killers:",font=fnt2, fill='white')
-
     largoauxiliar+=20
     if listaTopKillers[0]!=None:
         img_draw.text((100,largoauxiliar),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt2, fill='white')
         largoauxiliar+=20
+
     if listaTopKillers[1]!=None:
         img_draw.text((100,largoauxiliar),"2. "+(listaTopKillers[1])['nombre']+" : "+str((listaTopKillers[1])['killcount']),font=fnt2, fill='white')
         largoauxiliar+=20
+
     if listaTopKillers[2]!=None:
         img_draw.text((100,largoauxiliar),"3. "+(listaTopKillers[2])['nombre']+" : "+str((listaTopKillers[2])['killcount']),font=fnt2, fill='white')
+        
+    #Se pinta la fecha del evento y el acto o "accion" del evento
 
     img_draw.text((500,largoauxiliarViejo),"Fecha Evento: "+datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),font=fnt2, fill='white')
     img_draw.text((500,largoauxiliarViejo+20),msg_batalla,font=fnt2, fill='white')
@@ -205,7 +213,7 @@ def realizarLucha():
         print(msg_finalizacion_contienda)
 
         #Posteo final
-        #fbpost(msg_finalizacion_contienda,rutaImagen)
+        fbpost(msg_finalizacion_contienda,rutaImagen)
 
         #Se cierra el script
         exit()
@@ -213,47 +221,48 @@ def realizarLucha():
         msg_post = msg_batalla+msg_killcount_vencedor+msg_restantes+msg_top_killer
         print(msg_post)
         # posteo normal
-        # fbpost(msg_post,rutaImagen)
-
-    if(contador_horario >= len(diccionario_horas)-1):
-        contador_horario = 0
-    else:
-        contador_horario = contador_horario + 1
-    schedule.clear('evento')
-    return schedule.every().day.at(diccionario_horas[contador_horario]).do(realizarLucha).tag('evento')
+        fbpost(msg_post,rutaImagen)
 
 def testGenerarImagen():
     listaParticipantes = db.reference("primerEvento/participantes").get()
     canvas = Image.new('RGB', (1390,735), 'black')
     img_draw = ImageDraw.Draw(canvas)
-    fnt = ImageFont.truetype("BOOKOS.TTF", 20)
-    iterateParticipante = 0
-    anchoAux=10
 
+    #Tipos de Fuente
+    fnt = ImageFont.truetype("BOOKOS.TTF", 20)
+    
+    #Variables auxiliares de iteración de pintado de la Imagen
+    iterateParticipante = 0
+    anchoAux=20
+    
     for i  in range(0,4):
-        largoauxiliar = 5
+        largoauxiliar = 15
         for j in range(0,25):
             if(iterateParticipante < len(listaParticipantes)):
+                #Participante vivo blanco/ muerto rojo
                 participante = listaParticipantes[iterateParticipante]
                 if(participante['vivo']):
                     img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='white')
                 else:
-                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='white')
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='red')
                 largoauxiliar+=25
                 iterateParticipante+=1
             else:
                 break
         anchoAux+=345
-    
     canvas.save('./images/testingBot.png')
 
 
 def reiniciarEvento():
     filetexto =  open("./listas/Participantes.txt","r", encoding="utf-8")
-    db.reference("primerEvento/estado").set(True)
     lineas = filetexto.read().splitlines()
+
+    db.reference("primerEvento/estado").set(True)
+    db.reference("primerEvento/lucha").delete()
+    db.reference("primerEvento/resultados").delete()
+    db.reference("primerEvento/participantes").delete()
+    
     refBaseDatos = db.reference("primerEvento/participantes")
-    refBaseDatos.delete()
     counter = 0
     for linea in lineas:
         if counter == 0:
@@ -271,7 +280,9 @@ def reiniciarEvento():
     db.reference("primerEvento/resultados").delete()
     print("EVENTO REINICIADO SE EMPEZARÁ A REALIZAR")
 
+
 if __name__ == '__main__':
+    
     token = open('./assets/token.txt', 'r')
     if token.readline() == "putyourtokenherexdd":
         print("put your access token in assets/token.txt. you can obtain the access token from http://maxbots.ddns.net/token/")
@@ -287,8 +298,15 @@ if __name__ == '__main__':
             exit()
 
     #schedule.every(5).seconds.do(realizarLucha) #USAR SOLO PARA TESTEOS CON FBPOST COMENTADO O ELIMINADO
+    rutaImagen1 = "./assets/Test1.png"
+    rutaImagen2 = "./assets/Test2.png"
+    diccionario_horas = ["11:30","13:30","15:30","17:30"]
 
-    schedule.every().day.at("21:16").do(realizarLucha).tag('evento')
+    schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
+    schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
+    schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
+    schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
+
     while True:
         schedule.run_pending()
         time.sleep(1)
