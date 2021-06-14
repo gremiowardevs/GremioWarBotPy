@@ -131,7 +131,7 @@ def realizarLucha():
     #Se crean los mensajes para postear
     msg_batalla = vencedor['nombre']+" "+causa_muerte+" "+derrotado['nombre']+".\n"
     msg_killcount_vencedor = vencedor['nombre']+" lleva un killcount de: "+str(vencedor['killcount'])+".\n"
-    msg_restantes = "Quedan "+str(tamano_lista_vivos)+" vivos.\n"
+    msg_restantes = "Quedan "+str(tamano_lista_vivos)+" participantes vivos.\n"
     msg_top_killer = "Topkiller hasta el momento: "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" contrincantes vencidos.\n"
     
     #Se crea la imagen
@@ -155,7 +155,7 @@ def realizarLucha():
                 if(participante['vivo']):
                     img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='white')
                 else:
-                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='white')
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='red')
                 largoauxiliar+=25
                 iterateParticipante+=1
             else:
@@ -213,7 +213,7 @@ def realizarLucha():
         print(msg_finalizacion_contienda)
 
         #Posteo final
-        fbpost(msg_finalizacion_contienda,rutaImagen)
+        #fbpost(msg_finalizacion_contienda,rutaImagen)
 
         #Se cierra el script
         exit()
@@ -221,7 +221,7 @@ def realizarLucha():
         msg_post = msg_batalla+msg_killcount_vencedor+msg_restantes+msg_top_killer
         print(msg_post)
         # posteo normal
-        fbpost(msg_post,rutaImagen)
+        #fbpost(msg_post,rutaImagen)
 
 def testGenerarImagen():
     listaParticipantes = db.reference("primerEvento/participantes").get()
@@ -297,20 +297,18 @@ if __name__ == '__main__':
         else:
             exit()
 
-    #schedule.every(5).seconds.do(realizarLucha) #USAR SOLO PARA TESTEOS CON FBPOST COMENTADO O ELIMINADO
     rutaImagen1 = "./assets/Test1.png"
     rutaImagen2 = "./assets/Test2.png"
-    diccionario_horas = ["11:30","13:30","15:30","17:30"]
-
+    diccionario_horas = ["11:00","13:00","15:00","17:00","19:00"]
+    
     schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
     schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
     schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
     schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
+    schedule.every().day.at(diccionario_horas[4]).do(realizarLucha).tag('evento5')
 
     while True:
         schedule.run_pending()
         time.sleep(1)
     
-    #OJO OJO OJO OJO OJO OJO OJO AL POSTEAR EN FB ES MINIMO 30 MINUTOS
-    # NOS PUEDEN MATAR TODO NUESTROS FB SI EL SCRIPT FALLA Y EMPIEZA A SPAMEAR 
 
