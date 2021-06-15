@@ -56,13 +56,16 @@ def fbpost(msg,imgpath):
 
 ##Intentar realizar una lucha
 def realizarLucha():
+    
+    print("¡Se va a crear un Evento!")
+    print("Fecha y hora: "+datetime.datetime.now().strftime("%d/%M/%Y - %H:%M:%S"))
 
     #VERIFICACION SI EL EVENTO ESTÁ FUNCIONANDO
     if(not(db.reference("primerEvento/estado").get())):
         print("¡No quedan suficientes participantes vivos!")
         exit()
     
-    print("OCURRIÓ UNA LUCHA")
+    
 
     #Seed para generar un numero pseudo random (Se utiliza la hora para generarlo)
     seed(calendar.timegm(time.gmtime()))
@@ -216,12 +219,15 @@ def realizarLucha():
         #fbpost(msg_finalizacion_contienda,rutaImagen)
 
         #Se cierra el script
+        print("=======================================================\n")
         exit()
     else:
         msg_post = msg_batalla+msg_killcount_vencedor+msg_restantes+msg_top_killer
         print(msg_post)
         # posteo normal
         #fbpost(msg_post,rutaImagen)
+    
+    print("=======================================================\n")
 
 
 
@@ -255,6 +261,11 @@ def reiniciarEvento():
 
 
 if __name__ == '__main__':
+
+    print("===========\t  Gremio War BOT 2020  ===========")
+    print("===========\t  Creado por Carlos Ardila (ArdilaVene)  ===========")
+    print("=======================================================\n")
+
     
     token = open('./assets/token.txt', 'r')
     if token.readline() == "putyourtokenherexdd":
@@ -270,13 +281,13 @@ if __name__ == '__main__':
         else:
             exit()
 
-    #schedule.every(5).seconds.do(realizarLucha).run()
+    schedule.every(5).seconds.do(realizarLucha).run()
 
-    diccionario_horas = ["15:00","17:00","20:00","22:00"]
-    schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
-    schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
-    schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
-    schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
+    #diccionario_horas = ["15:00","17:00","20:00","22:00"]
+    #schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
+    #schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
+    #schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
+    #schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
 
     while True:
         schedule.run_pending()
