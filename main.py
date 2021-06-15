@@ -216,7 +216,7 @@ def realizarLucha():
         print(msg_finalizacion_contienda)
 
         #Posteo final
-        #fbpost(msg_finalizacion_contienda,rutaImagen)
+        fbpost(msg_finalizacion_contienda,rutaImagen)
 
         #Se cierra el script
         print("=======================================================\n")
@@ -225,7 +225,7 @@ def realizarLucha():
         msg_post = msg_batalla+msg_killcount_vencedor+msg_restantes+msg_top_killer
         print(msg_post)
         # posteo normal
-        #fbpost(msg_post,rutaImagen)
+        fbpost(msg_post,rutaImagen)
     
     print("=======================================================\n")
 
@@ -281,13 +281,12 @@ if __name__ == '__main__':
         else:
             exit()
 
-    schedule.every(5).seconds.do(realizarLucha).run()
 
-    #diccionario_horas = ["15:00","17:00","20:00","22:00"]
-    #schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
-    #schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
-    #schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
-    #schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
+    diccionario_horas = ["15:00","17:00","20:00","22:00"]
+    schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
+    schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
+    schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
+    schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
 
     while True:
         schedule.run_pending()
