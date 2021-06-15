@@ -54,54 +54,73 @@ def fbpost(msg,imgpath):
     print(f"Mensaje \"{msg}\" y publicación subida correctamente!")
 
 
+def testGenerarImagen():
+    listaParticipantes = db.reference("primerEvento/participantes").get()
+    listaParticipantesOrdenada =  sorted(listaParticipantes, key = lambda i: i['nombre'])
+    canvas = Image.new('RGB', (1410,760), 'black')
+    img_draw = ImageDraw.Draw(canvas)
+
+    #Tipos de Fuente
+    fnt = ImageFont.truetype("BOOKOS.TTF", 20)
+    
+    #Variables auxiliares de iteración de pintado de la Imagen
+    iterateParticipante = 0
+    anchoAux=20
+    
+    for i  in range(0,4):
+        largoauxiliar = 15
+        for j in range(0,27):
+            if(iterateParticipante < len(listaParticipantesOrdenada)):
+                #Participante vivo blanco/ muerto rojo
+                participante = listaParticipantesOrdenada[iterateParticipante]
+                if(participante['vivo']):
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='white')
+                else:
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='white')
+                largoauxiliar+=25
+                iterateParticipante+=1
+            else:
+                break
+        anchoAux+=350
+    canvas.save('./images/testingBot.png')
+
 ##Intentar realizar una lucha
 def realizarLucha():
+
 
     #VERIFICACION SI EL EVENTO ESTÁ FUNCIONANDO
     if(not(db.reference("primerEvento/estado").get())):
         print("¡No quedan suficientes participantes vivos!")
         exit()
     
-    print("OCURRIÓ UNA LUCHA")
+    print("Creación de lucha artificial")
+
+    idVencedor = input("ID DEL VENCEDOR\n")
+    idDerrotado = input("ID DERROTADO\n")
+    idCausaMuerte = input("ID causa muerte\n")
 
     #Seed para generar un numero pseudo random (Se utiliza la hora para generarlo)
-    seed(calendar.timegm(time.gmtime()))
 
     #Se obtiene un tipo de muerte al azar
-    lista_tipo_muerte =  db.reference("causamuerte/").get()
-    shuffle(lista_tipo_muerte)
-    causa_muerte = lista_tipo_muerte[randint(0, len(lista_tipo_muerte)-1)]
+    causa_muerte =  db.reference("causamuerte/"+str(idCausaMuerte)).get()
 
     #Se obtiene la lista de participantes
-    listaParticipantes = db.reference("primerEvento/participantes").get()
+    vencedor = db.reference("primerEvento/participantes/"+str(idVencedor)).get()
+    derrotado = db.reference("primerEvento/participantes/"+str(idDerrotado)).get()
+    listaParticipantes = db.reference("primerEvento/participantes/").get()
+
     listaVivos = []
 
     topKiller = listaParticipantes[0] #Se inicializa el topkiller para buscarlo
-
     #Se recorre la lista de participantes y se agregan los participantes vivos a una lista auxiliar
+    tamano_lista_vivos = 0
     for participante in listaParticipantes:
         if(participante['killcount']>topKiller['killcount']):
             topKiller = participante
+        if participante['vivo']:
+            tamano_lista_vivos+=1
 
-        if(participante['vivo']):
-            listaVivos.append(participante)
-
-
-    #Se obtiene el tamano de la lista vivo
-    shuffle(listaVivos)
-    tamano_lista_vivos = len(listaVivos)
     
-    #Se obtiene un id random de un vencedor y un derrotado
-    id_vencedor_listavivos = randint(0, tamano_lista_vivos-1)
-    id_derrotado_listavivos = randint(0,tamano_lista_vivos-1)
-
-    #Si el id del vencedor se repite, se busca otro numero random para el derrotado
-    while(id_vencedor_listavivos == id_derrotado_listavivos):
-        id_derrotado_listavivos = randint(0,tamano_lista_vivos-1)
-
-    #Se obtienen el vencedor y el derrotado con sus respectivos id
-    vencedor = listaVivos[id_vencedor_listavivos]
-    derrotado = listaVivos[id_derrotado_listavivos]
 
     #Se genera el id de un evento con este formato "ddmmaaaa-hhmmss-IDVENCEDORvsIDDERROTADO
     id_evento= datetime.datetime.now().strftime("%d%m%Y-%H%M%S")+"-"+str(vencedor['id'])+"vs"+str(derrotado['id'])
@@ -126,7 +145,6 @@ def realizarLucha():
         'causamuerte':causa_muerte
     })
 
-    #Se actualiza internamente la cantidad de participantes que quedan vivos
     tamano_lista_vivos-=1
 
     #Se crean los mensajes para postear
@@ -149,7 +167,7 @@ def realizarLucha():
     listaParticipantesOrdenada =  sorted(listaParticipantes, key = lambda i: i['nombre'])
     for i  in range(0,4):
         largoauxiliar = 15
-        for j in range(0,26):
+        for j in range(0,27):
             if(iterateParticipante < len(listaParticipantesOrdenada)):
                 #Participante vivo blanco/ muerto rojo
                 participante = listaParticipantesOrdenada[iterateParticipante]
@@ -167,7 +185,7 @@ def realizarLucha():
     listaTopKillers = sorted(listaParticipantes, key = lambda i: i['killcount'],reverse=True)
 
     #Se pintan los primeros 3 topkillers
-    largoauxiliar = 25+(26*25)
+    largoauxiliar = 25+(25*25)
     largoauxiliarViejo = largoauxiliar
     img_draw.text((50,largoauxiliar),"TOP 3 Killers:",font=fnt2, fill='white')
     largoauxiliar+=20
@@ -224,36 +242,6 @@ def realizarLucha():
         # posteo normal
         #fbpost(msg_post,rutaImagen)
 
-def testGenerarImagen():
-    listaParticipantes = db.reference("primerEvento/participantes").get()
-    listaParticipantesOrdenada =  sorted(listaParticipantes, key = lambda i: i['nombre'])
-    canvas = Image.new('RGB', (1410,745), 'black')
-    img_draw = ImageDraw.Draw(canvas)
-
-    #Tipos de Fuente
-    fnt = ImageFont.truetype("BOOKOS.TTF", 20)
-    
-    #Variables auxiliares de iteración de pintado de la Imagen
-    iterateParticipante = 0
-    anchoAux=20
-    
-    for i  in range(0,4):
-        largoauxiliar = 15
-        for j in range(0,25):
-            if(iterateParticipante < len(listaParticipantesOrdenada)):
-                #Participante vivo blanco/ muerto rojo
-                participante = listaParticipantesOrdenada[iterateParticipante]
-                if(participante['vivo']):
-                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='white')
-                else:
-                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='white')
-                largoauxiliar+=25
-                iterateParticipante+=1
-            else:
-                break
-        anchoAux+=350
-    canvas.save('./images/testingBot.png')
-
 
 
 
@@ -285,34 +273,20 @@ def reiniciarEvento():
     print("EVENTO REINICIADO SE EMPEZARÁ A REALIZAR")
 
 
-if __name__ == '__main__':
-    
-    token = open('./assets/token.txt', 'r')
-    if token.readline() == "putyourtokenherexdd":
-        print("put your access token in assets/token.txt. you can obtain the access token from http://maxbots.ddns.net/token/")
-        sys.exit("error no token")
+token = open('./assets/token.txt', 'r')
+if token.readline() == "putyourtokenherexdd":
+    print("put your access token in assets/token.txt. you can obtain the access token from http://maxbots.ddns.net/token/")
+    sys.exit("error no token")
 
-    testGenerarImagen()
-    
-    #VERIFICACION SI EL EVENTO ESTÁ FUNCIONANDO
-    if(not(db.reference("primerEvento/estado").get())):
-        print("¡No quedan suficientes participantes vivos!")
-        ans = input("Reiniciar Evento?(y/n) \n>")
-        if 'y' in ans.lower():
-            reiniciarEvento()
-        else:
-            exit()
+#VERIFICACION SI EL EVENTO ESTÁ FUNCIONANDO
+if(not(db.reference("primerEvento/estado").get())):
+    print("¡No quedan suficientes participantes vivos!")
+    ans = input("Reiniciar Evento?(y/n) \n>")
+    if 'y' in ans.lower():
+        reiniciarEvento()
+    else:
+        exit()
 
+#realizarLucha()
+testGenerarImagen()
     
-    diccionario_horas = ["17:00","19:00","21:00","22:00"]
-    schedule.every(5).seconds.do(realizarLucha).run()
-    #schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
-    #schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
-    #schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
-    #schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
-
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-    
-
