@@ -19,6 +19,8 @@ import datetime
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('./assets/gremiowarbotpy-firebase-adminsdk-n4ph5-54aa378e6b.json')
+global contador_horario
+contador_horario = 0
 
 # Initialize the app with a service account, granting admin privileges
 firebase_admin.initialize_app(cred, {'databaseURL': 'https://gremiowarbotpy-default-rtdb.firebaseio.com/'})
@@ -57,6 +59,8 @@ def fbpost(msg,imgpath):
 ##Intentar realizar una lucha
 def realizarLucha():
 
+    global contador_horario
+    diccionario_horas = ["21:16","21:17","21:18","21:19"]
     #VERIFICACION SI EL EVENTO ESTÁ FUNCIONANDO
     if(not(db.reference("primerEvento/estado").get())):
         print("¡No quedan suficientes participantes vivos!")
@@ -208,8 +212,15 @@ def realizarLucha():
     else:
         msg_post = msg_batalla+msg_killcount_vencedor+msg_restantes+msg_top_killer
         print(msg_post)
-        #posteo normal
-        #fbpost(msg_post,rutaImagen)
+        # posteo normal
+        # fbpost(msg_post,rutaImagen)
+
+    if(contador_horario >= len(diccionario_horas)-1):
+        contador_horario = 0
+    else:
+        contador_horario = contador_horario + 1
+    schedule.clear('evento')
+    return schedule.every().day.at(diccionario_horas[contador_horario]).do(realizarLucha).tag('evento')
 
 def testGenerarImagen():
     listaParticipantes = db.reference("primerEvento/participantes").get()
@@ -277,7 +288,7 @@ if __name__ == '__main__':
 
     #schedule.every(5).seconds.do(realizarLucha) #USAR SOLO PARA TESTEOS CON FBPOST COMENTADO O ELIMINADO
 
-    schedule.every().day.at("06:00").do(realizarLucha)
+    schedule.every().day.at("21:16").do(realizarLucha).tag('evento')
     while True:
         schedule.run_pending()
         time.sleep(1)
