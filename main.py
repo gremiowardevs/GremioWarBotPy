@@ -112,7 +112,6 @@ def realizarLucha():
 
     #Se aumenta el killcount del vencedor
     db.reference("primerEvento/participantes/"+str(vencedor['id'])+"/killcount").set(vencedor['killcount']+1)
-    vencedor['killcount']+=1
     (listaParticipantes[vencedor['id']])['killcount'] += 1
 
     #Si el vencedor supera en killcount al topkiller se convierte en el nuevo topkiller
@@ -136,7 +135,7 @@ def realizarLucha():
     msg_top_killer = "Topkiller hasta el momento: "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" contrincantes vencidos.\n"
     
     #Se crea la imagen
-    canvas = Image.new('RGB', (1410,760), 'black')
+    canvas = Image.new('RGB', (1410,785), 'black')
     img_draw = ImageDraw.Draw(canvas)
 
     #Tipos de Fuente
@@ -149,7 +148,7 @@ def realizarLucha():
     listaParticipantesOrdenada =  sorted(listaParticipantes, key = lambda i: i['nombre'])
     for i  in range(0,4):
         largoauxiliar = 15
-        for j in range(0,26):
+        for j in range(0,27):
             if(iterateParticipante < len(listaParticipantesOrdenada)):
                 #Participante vivo blanco/ muerto rojo
                 participante = listaParticipantesOrdenada[iterateParticipante]
@@ -167,7 +166,7 @@ def realizarLucha():
     listaTopKillers = sorted(listaParticipantes, key = lambda i: i['killcount'],reverse=True)
 
     #Se pintan los primeros 3 topkillers
-    largoauxiliar = 25+(26*25)
+    largoauxiliar = 25+(27*25)
     largoauxiliarViejo = largoauxiliar
     img_draw.text((50,largoauxiliar),"TOP 3 Killers:",font=fnt2, fill='white')
     largoauxiliar+=20
@@ -224,36 +223,6 @@ def realizarLucha():
         # posteo normal
         #fbpost(msg_post,rutaImagen)
 
-def testGenerarImagen():
-    listaParticipantes = db.reference("primerEvento/participantes").get()
-    listaParticipantesOrdenada =  sorted(listaParticipantes, key = lambda i: i['nombre'])
-    canvas = Image.new('RGB', (1410,745), 'black')
-    img_draw = ImageDraw.Draw(canvas)
-
-    #Tipos de Fuente
-    fnt = ImageFont.truetype("BOOKOS.TTF", 20)
-    
-    #Variables auxiliares de iteración de pintado de la Imagen
-    iterateParticipante = 0
-    anchoAux=20
-    
-    for i  in range(0,4):
-        largoauxiliar = 15
-        for j in range(0,25):
-            if(iterateParticipante < len(listaParticipantesOrdenada)):
-                #Participante vivo blanco/ muerto rojo
-                participante = listaParticipantesOrdenada[iterateParticipante]
-                if(participante['vivo']):
-                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='white')
-                else:
-                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='white')
-                largoauxiliar+=25
-                iterateParticipante+=1
-            else:
-                break
-        anchoAux+=350
-    canvas.save('./images/testingBot.png')
-
 
 
 
@@ -291,8 +260,6 @@ if __name__ == '__main__':
     if token.readline() == "putyourtokenherexdd":
         print("put your access token in assets/token.txt. you can obtain the access token from http://maxbots.ddns.net/token/")
         sys.exit("error no token")
-
-    testGenerarImagen()
     
     #VERIFICACION SI EL EVENTO ESTÁ FUNCIONANDO
     if(not(db.reference("primerEvento/estado").get())):
@@ -303,13 +270,13 @@ if __name__ == '__main__':
         else:
             exit()
 
-    
-    diccionario_horas = ["17:00","19:00","21:00","22:00"]
-    schedule.every(5).seconds.do(realizarLucha).run()
-    #schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
-    #schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
-    #schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
-    #schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
+    #schedule.every(5).seconds.do(realizarLucha).run()
+
+    diccionario_horas = ["15:00","17:00","20:00","22:00"]
+    schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
+    schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
+    schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
+    schedule.every().day.at(diccionario_horas[3]).do(realizarLucha).tag('evento4')
 
     while True:
         schedule.run_pending()
