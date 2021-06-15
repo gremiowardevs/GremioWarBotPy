@@ -76,7 +76,7 @@ def testGenerarImagen():
                 if(participante['vivo']):
                     img_draw.text((anchoAux, largoauxiliar), participante['nombre'],font=fnt, fill='white')
                 else:
-                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='white')
+                    img_draw.text((anchoAux, largoauxiliar), participante['nombre'], font=fnt, fill='red')
                 largoauxiliar+=25
                 iterateParticipante+=1
             else:
