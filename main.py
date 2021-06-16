@@ -137,14 +137,13 @@ def realizarLucha():
     msg_restantes = "Quedan "+str(tamano_lista_vivos)+" participantes vivos.\n"
     msg_top_killer = "Topkiller hasta el momento: "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" contrincantes vencidos.\n"
     
-    #Se crea la imagen
-    canvas = Image.new('RGB', (1410,785), 'black')
+    #Se crea la imagen y el canvas
+    canvas = Image.new('RGB', (1435,790), 'black')
     img_draw = ImageDraw.Draw(canvas)
 
     #Tipos de Fuente
     fnt = ImageFont.truetype("BOOKOS.TTF", 20)
-    fnt2 = ImageFont.truetype("BOOKOS.TTF", 15)
-
+    fnt2 = ImageFont.truetype("arial.ttf", 20)
     #Variables auxiliares de iteración de pintado de la Imagen
     iterateParticipante = 0
     anchoAux=20
@@ -169,9 +168,9 @@ def realizarLucha():
     listaTopKillers = sorted(listaParticipantes, key = lambda i: i['killcount'],reverse=True)
 
     #Se pintan los primeros 3 topkillers
-    largoauxiliar = 25+(27*25)
+    largoauxiliar = 20+(27*25)
     largoauxiliarViejo = largoauxiliar
-    img_draw.text((50,largoauxiliar),"TOP 3 Killers:",font=fnt2, fill='white')
+    img_draw.text((50,largoauxiliar),"TOP 3 Killers:",font=fnt2, fill='gold')
     largoauxiliar+=20
     if listaTopKillers[0]!=None:
         img_draw.text((100,largoauxiliar),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt2, fill='white')
@@ -212,7 +211,7 @@ def realizarLucha():
         db.reference("primerEvento/resultados/topkiller/nombre").set(topKiller['nombre'])
         db.reference("primerEvento/resultados/topkiller/killcount").set(topKiller['killcount'])
 
-        msg_finalizacion_contienda = msg_batalla+msg_ganador_final+msg_ganador_killcount+msg_top_killer_final
+        msg_finalizacion_contienda = msg_batalla+"\n"+msg_ganador_final+"\n"+msg_ganador_killcount+"\n"+msg_top_killer_final
         print(msg_finalizacion_contienda)
 
         #Posteo final
@@ -222,7 +221,7 @@ def realizarLucha():
         print("=======================================================\n")
         exit()
     else:
-        msg_post = msg_batalla+msg_killcount_vencedor+msg_restantes+msg_top_killer
+        msg_post = msg_batalla+"\n"+msg_killcount_vencedor+"\n"+msg_restantes+msg_top_killer
         print(msg_post)
         # posteo normal
         fbpost(msg_post,rutaImagen)
