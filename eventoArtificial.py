@@ -57,11 +57,13 @@ def fbpost(msg,imgpath):
 def testGenerarImagen():
     listaParticipantes = db.reference("primerEvento/participantes").get()
     listaParticipantesOrdenada =  sorted(listaParticipantes, key = lambda i: i['nombre'])
-    canvas = Image.new('RGB', (1410,760), 'black')
+    canvas = Image.new('RGB', (1435,790), 'black')
     img_draw = ImageDraw.Draw(canvas)
 
     #Tipos de Fuente
     fnt = ImageFont.truetype("BOOKOS.TTF", 20)
+    fnt2 = ImageFont.truetype("arial.ttf", 20)
+
     
     #Variables auxiliares de iteración de pintado de la Imagen
     iterateParticipante = 0
@@ -81,8 +83,38 @@ def testGenerarImagen():
                 iterateParticipante+=1
             else:
                 break
-        anchoAux+=350
+        anchoAux+=355
+
+    #Lista ordenada por killcount de manera descendiente
+    listaTopKillers = sorted(listaParticipantes, key = lambda i: i['killcount'],reverse=True)
+
+    #Se pintan los primeros 3 topkillers
+    largoauxiliar = 20+(27*25)
+    largoauxiliarViejo = largoauxiliar
+    img_draw.text((50,largoauxiliar),"TOP 3 Killers:",font=fnt2, fill='gold')
+    largoauxiliar+=20
+    if listaTopKillers[0]!=None:
+        img_draw.text((100,largoauxiliar),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt2, fill='white')
+        largoauxiliar+=20
+
+    if listaTopKillers[1]!=None:
+        img_draw.text((100,largoauxiliar),"2. "+(listaTopKillers[1])['nombre']+" : "+str((listaTopKillers[1])['killcount']),font=fnt2, fill='white')
+        largoauxiliar+=20
+
+    if listaTopKillers[2]!=None:
+        img_draw.text((100,largoauxiliar),"3. "+(listaTopKillers[2])['nombre']+" : "+str((listaTopKillers[2])['killcount']),font=fnt2, fill='white')
+        
+    #Se pinta la fecha del evento y el acto o "accion" del evento
+
+    img_draw.text((500,largoauxiliarViejo),"Fecha Evento: "+datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),font=fnt2, fill='white')
+    img_draw.text((500,largoauxiliarViejo+20),"Mensaje de la batalla",font=fnt2, fill='white')
+    img_draw.text((500,largoauxiliarViejo+40),"Mensaje de los restantes",font=fnt2, fill='white')
+
     canvas.save('./images/testingBot.png')
+
+    img_draw.text((500,largoauxiliarViejo),"Fecha Evento: "+datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),font=fnt2, fill='white')
+    img_draw.text((500,largoauxiliarViejo+20),"MENSAJE DE LA BATALLA",font=fnt2, fill='white')
+    img_draw.text((500,largoauxiliarViejo+40),"MENSAJE DE LOS RESTANTES",font=fnt2, fill='white')
 
 ##Intentar realizar una lucha
 def realizarLucha():
