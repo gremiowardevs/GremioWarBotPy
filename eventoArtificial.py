@@ -16,12 +16,17 @@ import time;
 from PIL import Image, ImageDraw, ImageFont
 import datetime
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('./assets/gremiowarbotpy-firebase-adminsdk-n4ph5-54aa378e6b.json')
 
 # Initialize the app with a service account, granting admin privileges
-firebase_admin.initialize_app(cred, {'databaseURL': 'https://gremiowarbotpy-default-rtdb.firebaseio.com/'})
+firebase_admin.initialize_app(cred, {'databaseURL': os.getenv('FIREBASE_DATABASE_URL')})
 
 def catch_exceptions(cancel_on_failure=False):
     def catch_exceptions_decorator(job_func):
@@ -47,8 +52,7 @@ def catch_exceptions(cancel_on_failure=False):
 @catch_exceptions()
 ##Posteo en Facebook de un mensaje con imagen
 def fbpost(msg,imgpath):
-    with open('./assets/token.txt','r') as token:
-        accesstoken = token.readline()
+    accesstoken=os.getenv('TOKEN')
     graph = facebook.GraphAPI(accesstoken)
     post_id = graph.put_photo(image=open(imgpath,"rb"),message = msg)['post_id']
     print(f"Mensaje \"{msg}\" y publicación subida correctamente!")
@@ -60,6 +64,7 @@ def testGenerarImagen():
     canvas = Image.new('RGB', (1435,790), 'black')
     img_draw = ImageDraw.Draw(canvas)
 
+    
     #Tipos de Fuente
     fnt = ImageFont.truetype("BOOKOS.TTF", 20)
     fnt2 = ImageFont.truetype("arial.ttf", 20)
@@ -185,14 +190,13 @@ def realizarLucha():
     msg_restantes = "Quedan "+str(tamano_lista_vivos)+" participantes vivos.\n"
     msg_top_killer = "Topkiller hasta el momento: "+topKiller['nombre']+" con un total de "+str(topKiller['killcount'])+" contrincantes vencidos.\n"
     
-    #Se crea la imagen
-    canvas = Image.new('RGB', (1410,760), 'black')
+    #Se crea la imagen y el canvas
+    canvas = Image.new('RGB', (1435,790), 'black')
     img_draw = ImageDraw.Draw(canvas)
 
     #Tipos de Fuente
     fnt = ImageFont.truetype("BOOKOS.TTF", 20)
-    fnt2 = ImageFont.truetype("BOOKOS.TTF", 15)
-
+    fnt2 = ImageFont.truetype("arial.ttf", 20)
     #Variables auxiliares de iteración de pintado de la Imagen
     iterateParticipante = 0
     anchoAux=20
@@ -217,9 +221,9 @@ def realizarLucha():
     listaTopKillers = sorted(listaParticipantes, key = lambda i: i['killcount'],reverse=True)
 
     #Se pintan los primeros 3 topkillers
-    largoauxiliar = 25+(25*25)
+    largoauxiliar = 20+(27*25)
     largoauxiliarViejo = largoauxiliar
-    img_draw.text((50,largoauxiliar),"TOP 3 Killers:",font=fnt2, fill='white')
+    img_draw.text((50,largoauxiliar),"TOP 3 Killers:",font=fnt2, fill='gold')
     largoauxiliar+=20
     if listaTopKillers[0]!=None:
         img_draw.text((100,largoauxiliar),"1. "+(listaTopKillers[0])['nombre']+" : "+str((listaTopKillers[0])['killcount']),font=fnt2, fill='white')
@@ -264,7 +268,7 @@ def realizarLucha():
         print(msg_finalizacion_contienda)
 
         #Posteo final
-        #fbpost(msg_finalizacion_contienda,rutaImagen)
+        fbpost(msg_finalizacion_contienda,rutaImagen)
 
         #Se cierra el script
         exit()
@@ -272,7 +276,7 @@ def realizarLucha():
         msg_post = msg_batalla+msg_killcount_vencedor+msg_restantes+msg_top_killer
         print(msg_post)
         # posteo normal
-        #fbpost(msg_post,rutaImagen)
+        fbpost(msg_post,rutaImagen)
 
 
 
@@ -319,6 +323,8 @@ if(not(db.reference("primerEvento/estado").get())):
     else:
         exit()
 
-#realizarLucha()
-testGenerarImagen()
+realizarLucha()
+#testGenerarImagen()
+
+#subirCausaMuerteFirebase()
     
