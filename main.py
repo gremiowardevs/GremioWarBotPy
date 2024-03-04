@@ -15,13 +15,15 @@ import calendar;
 import time;
 from PIL import Image, ImageDraw, ImageFont
 import datetime
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('./assets/gremiowarbotpy-firebase-adminsdk-n4ph5-54aa378e6b.json')
-
 # Initialize the app with a service account, granting admin privileges
-firebase_admin.initialize_app(cred, {'databaseURL': 'https://gremiowarbotpy-default-rtdb.firebaseio.com/'})
+firebase_admin.initialize_app(cred, {'databaseURL': os.getenv('FIREBASE_DATABASE_URL')})
 
 def catch_exceptions(cancel_on_failure=False):
     def catch_exceptions_decorator(job_func):
@@ -47,8 +49,7 @@ def catch_exceptions(cancel_on_failure=False):
 @catch_exceptions()
 ##Posteo en Facebook de un mensaje con imagen
 def fbpost(msg,imgpath):
-    with open('./assets/token.txt','r') as token:
-        accesstoken = token.readline()
+    accesstoken=os.getenv('TOKEN')
     graph = facebook.GraphAPI(accesstoken)
     post_id = graph.put_photo(image=open(imgpath,"rb"),message = msg)['post_id']
     print(f"Mensaje \"{msg}\" y publicación subida correctamente!")
@@ -266,7 +267,7 @@ if __name__ == '__main__':
     print("=======================================================\n")
 
     
-    token = open('./assets/token.txt', 'r')
+    token=os.getenv('TOKEN')
     if token.readline() == "putyourtokenherexdd":
         print("put your access token in assets/token.txt. you can obtain the access token from http://maxbots.ddns.net/token/")
         sys.exit("error no token")
@@ -281,7 +282,7 @@ if __name__ == '__main__':
             exit()
 
 
-    diccionario_horas = ["15:00","17:00","20:00","22:00"]
+    diccionario_horas = ["15:00","17:07","19:00","21:00"]
     schedule.every().day.at(diccionario_horas[0]).do(realizarLucha).tag('evento1')
     schedule.every().day.at(diccionario_horas[1]).do(realizarLucha).tag('evento2')
     schedule.every().day.at(diccionario_horas[2]).do(realizarLucha).tag('evento3')
